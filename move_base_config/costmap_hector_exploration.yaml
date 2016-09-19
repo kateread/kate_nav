@@ -1,0 +1,61 @@
+#exploration_planner_node:
+#	close_to_path_target_distance:
+#	dist_for_goal_reached:
+#	explore_close_to_path:
+#   goal_angle_penalty: 0.1
+#	min_frontier_size:
+#   min_obstacle_dist: 0.1
+#	observation_pose_allowed_angle:
+#	observation_pose_desired_dist:
+#	obstacle_cutoff_distance:
+#	plan_in_unknown:
+#	same_frontier_distance:
+#	security_constant:
+#	use_inflated_obstacles:
+#	use_observation_pose_calculation:
+
+
+
+
+global_costmap:
+
+  map_type: costmap
+  track_unknown_space: true
+  unknown_cost_value: 255
+
+
+  #Obstacle marking parameters 
+  obstacle_range: 2.5
+  raytrace_range: 3.0
+
+  resolution: 0.075
+
+  footprint: [[-0.325, -0.325], [-0.325, 0.325], [0.325, 0.325], [0.46, 0.0], [0.325, -0.325]]
+
+
+#Set the tolerance we're willing to have for tf transforms
+#Causes lots of problems when removed
+  transform_tolerance: 7.0
+
+#Cost function parameters
+  inscribed_radius: 0.3
+
+  cost_scaling_factor: 10.0
+  circumscribed_radius: 0.32
+
+  global_frame: /map
+  robot_base_frame: /base_link
+  update_frequency: 0.5
+  publish_frequency: 0.1
+
+ # footprint_padding: 0.05
+
+  static_map: false
+  rolling_window: true
+
+
+
+
+#observation_sources: base_scan
+#base_scan: {data_type: LaserScan, expected_update_rate: 0.4,
+#  observation_persistence: 0.0, marking: true, clearing: true, max_obstacle_height: 0.4, min_obstacle_height: 0.08}
