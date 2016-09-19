@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<launch>  
+
+<master auto="start"/>
+
+<param name="/use_sim_time" value="true"/>
+
+
+  <node pkg="stage_ros" type="stageros" name="stageros" args="/home/kate/kate_nav/stage_config/worlds/kates.world" respawn="false">
+    <param name="base_watchdog_timeout" value="0.2"/>
+  </node>
+
+
+
+
+ <node pkg="tf" type="static_transform_publisher" name="base_to_laser_broadcaster"      args="0 0 0 0 0 0 /base_link /laser 100" />  
+
+  <node name="rviz" pkg="rviz" type="rviz" args="/home/kate/kate_nav/single_robot.rviz" />
+
+</launch>

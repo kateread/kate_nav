@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+
+<launch>
+  <master auto="start"/>
+  <param name="/use_sim_time" value="true"/>
+
+
+<!-- STAGEROS -->
+  <node pkg="stage_ros" type="stageros" name="stageros" args="/home/kate/kate_nav/stage_config/worlds/kates.world" respawn="false">
+    <param name="base_watchdog_timeout" value="0.2"/>
+  </node>
+
+
+<node pkg="hector_map_server" type="hector_map_server" name="hector_map_server" output="screen"/>
+
+
+<node pkg="hector_mapping" type="hector_mapping" name="hector_mapping"    output="screen">
+    
+	<!-- Topic names -->
+	<param name="scan_topic" value="base_scan" />
+
+    <!-- Tf use -->
+	<param name="use_tf_scan_transformation" value="true" />
+	<param name="use_tf_pose_start_estimate" value="false" />
+		<!-- Determine if the map->odom transform should be published by the system. -->
+	<param name="pub_map_odom_transform" value="true"/>
+    
+	<!-- Advertising config --> 
+    <param name="advertise_map_service" value="true"/>
+
+    <!-- Frame names -->
+		<!-- The name of the map frame. -->
+	<param name="map_frame" value="map" /> 
+		<!-- The name of the base frame of the robot. 
+				This is the frame used for localization and for transformation of laser scan data. -->
+	<param name="base_frame" value="base_link" />
+		<!-- The name of the odom frame. -->
+	<param name="odom_frame" value="odom" />
+
+	<!-- Map size / start point -->
+		<!-- The map resolution [m]. This is the length of a grid cell edge. -->
+	<param name="map_resolution" value="0.025"/>
+		<!-- The size [number of cells per axis] of the map. The map is square and has (map_size * map_size) grid cells. -->
+	<param name="map_size" value="1024"/>
+		<!-- Location of the origin [0.0, 1.0] of the /map frame on the x axis relative to the grid map. 0.5 is in the middle. -->
+	<param name="map_start_x" value="0.5"/>
+		<!-- Location of the origin [0.0, 1.0] of the /map frame on the y axis relative to the grid map. 0.5 is in the middle. -->
+	<param name="map_start_y" value="0.5" />
+		<!-- The minimum distance [m] for laser scan endpoints to be used by the system. 
+				Scan endpoints closer than this value are ignored. -->
+    <param name="laser_min_dist" value="0.01"/>
+		<!-- The maximum distance [m] for laser scan endpoints to be used by the system. 
+				Scan endpoints farther away than this value are ignored. -->
+	<param name="laser_max_dist" value="15.0"/>
+		<!-- The minimum height [m] relative to the laser scanner frame for laser scan endpoints to be used by the system. 
+				Scan endpoints lower than this value are ignored. -->
+	<param name="laser_z_min_value" value="-1.0" />
+		<!-- The maximum height [m] relative to the laser scanner frame for laser scan endpoints to be used by the system. 
+				Scan endpoints higher than this value are ignored. -->
+	<param name="laser_z_max_value" value="1.5" />
+
+	<!-- Map update parameters -->
+
+		<!-- The map update modifier for updates of free cells in the range [0.0, 1.0]. A value of 0.5 means no change. -->
+	<param name="update_factor_free" value="0.4"/>
+		<!-- The map update modifier for updates of occupied cells in the range [0.0, 1.0]. A value of 0.5 means no change. -->
+	<param name="update_factor_occupied" value="0.9" />    
+
+		<!-- Threshold for performing map updates [m]. 
+				The platform has to travel this far in meters or experience an angular change as described by the
+						 map_update_angle_thresh parameter since the last update before a map update happens. -->
+	<param name="map_update_distance_thresh" value="0.7"/>
+		<!-- Threshold for performing map updates [rad]. 
+				The platform has to experience an angular change as described by this parameter of travel as far as specified by 
+					the map_update_distance_thresh parameter since the last update before a map update happens. -->
+	<param name="map_update_angle_thresh" value="0.07" />
+		<!-- The queue size of the scan subscriber. This should be set to high values (for example 50) 
+				if logfiles are played back to hector_mapping at faster than realtime speeds. -->
+
+	<param name="scan_subscriber_queue_size" value="25" />
+
+		<!-- The map publish period [s].-->
+	<param name="map_pub_period" value="2.0"/>	
+		<!-- The number of map multi-resolution grid levels. -->
+	<param name="map_multi_res_levels" value="3"/>
+
+
+
+		<!-- Determines if the scanmatcher to map transform should be published to tf. The frame name is determined by the 					'tf_map_scanmatch_transform_frame_name' parameter. -->
+	<param name="pub_map_scanmatch_transform" value="true"/>
+		<!-- The frame name when publishing the scanmatcher to map transform as described in the preceding parameter. -->
+    <param name="tf_map_scanmatch_transform_frame_name" value="scanmatcher_frame" /> 
+
+</node>
+
+
+
+
+<node pkg="hector_trajectory_server" type="hector_trajectory_server" name="hector_trajectory_server" output="screen">
+	<param name="target_frame_name" type="string" value="/map" />
+	<param name="source_frame_name" type="string" value="/scanmatcher_frame" />
+	<param name="trajectory_update_rate" type="double" value="4.0" />
+	<param name="trajectory_publish_rate" type="double" value="0.25" />
+</node>
+
+<!--
+  <node pkg="hector_geotiff" type="geotiff_node" name="hector_geotiff_node" output="screen" launch-prefix="nice -n 15">
+    <remap from="map" to="/dynamic_map" />
+    <param name="map_file_path" type="string" value="/home/kate/kate_nav/maps" />
+    <param name="map_file_base_name" type="string" value="hector_slam_map" />
+    <param name="geotiff_save_period" type="double" value="0" />
+    <param name="draw_background_checkerboard" type="bool" value="true" />
+    <param name="draw_free_space_grid" type="bool" value="true" />
+    <param name="plugins" type="string" value="hector_geotiff_plugins/TrajectoryMapWriter" />
+  </node>
+-->
+
+ <!--EXPLORATION NODE -->
+
+<node pkg="hector_exploration_node" type="exploration_planner_node" name="hector_exploration_node" output="screen" >
+
+    <rosparam file="/home/kate/kate_nav/move_base_config/costmap_hector_exploration.yaml" command="load" />
+
+</node>
+
+
+
+<!-- MOVE BASE -->
+<!--
+<node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+    <param name="footprint_padding" value="0.01" />
+    <param name="controller_frequency" value="20.0" />
+    <param name="controller_patience" value="3.0" />
+
+    <param name="oscillation_timeout" value="30.0" />
+    <param name="oscillation_distance" value="0.5" />
+</node>
+-->
+
+<!--EXPLORATION CONTROLLER -->
+
+<node pkg="hector_exploration_controller" type="simple_exploration_controller" name="simple_exploration_controller" output="screen" />
+
+
+<!-- PATH FOLLOWER NODE -->
+<!--
+<node pkg="hector_path_follower" type="hector_path_follower_node" name="hector_path_follower" output="screen"/>
+-->
+
+
+<node pkg="tf" type="static_transform_publisher" name="base_to_laser_broadcaster"      args="0 0 0 0 0 0 /base_link /laser 100" />  
+
+
+<node name="rviz" pkg="rviz" type="rviz" args="/home/kate/kate_nav/single_robot.rviz" />
+
+</launch>

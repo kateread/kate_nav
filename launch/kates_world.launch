@@ -1,0 +1,12 @@
+<launch>
+  <master auto="start"/>
+
+  <node pkg="stage_ros" type="stageros" name="stageros" args="/home/kate/kate_nav/stage_config/worlds/kates.world" respawn="false"/>
+
+  <node pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" name="teleop_twist_keyboard"/>
+
+</launch>
+
+
+
+
